@@ -25,6 +25,19 @@ pub fn to_path(url: &Url, with_fragment: bool) -> String {
         .map_or("", |filename| filename.to_str().unwrap())
         .to_string();
 
+    // Ensure the folder names are not too long
+    parent = parent
+        .split('/')
+        .map(|str| {
+            if str.len() > FILE_NAME_MAX_LENGTH {
+                &format!("{:x}", md5::compute(&str))
+            } else {
+                str
+            }
+        })
+        .collect::<Vec<&str>>()
+        .join("/");
+
     if url_path_and_query.ends_with('/') {
         filename = "index.html".to_string();
         parent = url_path_and_query.trim_end_matches('/').to_string();
